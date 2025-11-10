@@ -2,13 +2,8 @@ name: Telegram IP Bot
 
 on:
   schedule:
-    # يشغل كل 6 ساعات (UTC time)
     - cron: '0 */6 * * *'
-  
-  # تشغيل يدوي
   workflow_dispatch:
-  
-  # تشغيل عند تحديث الكود
   push:
     branches: [ main ]
 
@@ -31,9 +26,21 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         
+    - name: Check Token Availability
+      run: |
+        if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
+          echo "❌ ERROR: TELEGRAM_BOT_TOKEN is not set"
+          echo "💡 Please add your token to GitHub Secrets"
+          exit 1
+        else
+          echo "✅ TELEGRAM_BOT_TOKEN is available"
+          echo "Token length: ${#TELEGRAM_BOT_TOKEN} characters"
+        fi
+        
     - name: Run Telegram Bot
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       run: |
         echo "🕒 البوت يعمل في: $(date)"
+        echo "🔧 Starting bot with token..."
         python bot.py
